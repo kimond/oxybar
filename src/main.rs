@@ -18,6 +18,7 @@ fn build_ui(application: &gtk::Application) {
     let label = gtk::Label::new("Test");
     hbox.add(&label);
 
+    window.set_role("oxybar");
     window.set_border_width(1);
     window.set_position(gtk::WindowPosition::None);
     window.set_default_size(monitor_rec.width, 20);
