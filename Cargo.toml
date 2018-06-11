@@ -1,0 +1,12 @@
+[package]
+name = "oxybar"
+version = "0.1.0"
+authors = ["Kim Desrosiers <kimdesro@gmail.com>"]
+
+[dependencies]
+gio = "0.4.1"
+gtk = "0.4.1"
+
+[dependencies.gdk]
+version = "0.8.0"
+features = ["v3_22"]
