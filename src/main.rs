@@ -1,15 +1,16 @@
-extern crate sys_info;
 extern crate gdk;
-extern crate gio;
+extern crate glib;
 extern crate gtk;
+extern crate sys_info;
 
-use gio::prelude::*;
-use gtk::prelude::*;
 use gdk::prelude::*;
-use gtk::{Box, Window, WindowType, Label};
-use sys_info::loadavg;
+use gtk::{Box, Label, Window, WindowType};
+use gtk::prelude::*;
+use std::cell::RefCell;
+use std::sync::mpsc::{channel, Receiver};
 use std::thread;
 use std::time::Duration;
+use sys_info::loadavg;
 
 pub struct CpuModule {
     label: Label
@@ -17,21 +18,52 @@ pub struct CpuModule {
 
 impl CpuModule {
     fn new() -> CpuModule {
+        let (tx, rx) = channel();
         let label = Label::new("...");
-        match loadavg() {
-            Ok(load) => {
-                let load_value = load.one.to_string();
-                label.set_text(&load_value);
-            },
-            Err(x) => {
-                eprintln!("Cannot load cpu usage: {}", x);
-                label.set_text("Error");
-            }
-        }
 
-        CpuModule {label}
+        // put TextBuffer and receiver in thread local storage
+        GLOBAL.with(|global| {
+            *global.borrow_mut() = Some((label.clone(), rx))
+        });
+
+        thread::spawn(move || {
+            loop {
+                thread::sleep(Duration::from_secs(1));
+                match loadavg() {
+                    Ok(load) => {
+                        let load_value = load.one.to_string();
+                        println!("{}", load_value);
+                        tx.send(load_value).expect("Counld't send data to channel");
+                        glib::idle_add(receive);
+                    }
+                    Err(x) => {
+                        eprintln!("Cannot load cpu usage: {}", x);
+                        tx.send("error".to_string()).expect("Couldn't send data to channel");
+                        glib::idle_add(receive);
+                    }
+                }
+            }
+        });
+
+        CpuModule { label }
     }
 }
+
+fn receive() -> glib::Continue {
+    GLOBAL.with(|global| {
+        if let Some((ref label, ref rx)) = *global.borrow() {
+            if let Ok(text) = rx.try_recv() {
+                label.set_text(&text);
+            }
+        }
+    });
+    glib::Continue(false)
+}
+
+// declare a new thread local storage key
+thread_local!(
+    static GLOBAL: RefCell<Option<(Label, Receiver<String>)>> = RefCell::new(None)
+);
 
 pub struct Bar {
     container: Box,
@@ -58,7 +90,7 @@ impl Bar {
         container.pack_start(&left_widgets, true, true, 0);
         container.pack_end(&right_widgets, true, true, 0);
 
-        Bar {container, left_widgets, right_widgets }
+        Bar { container, left_widgets, right_widgets }
     }
 }
 
