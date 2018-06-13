@@ -1,11 +1,12 @@
 use std::thread;
 use std::time::Duration;
-use sys_info::loadavg;
 use gtk::{Label, LabelExt, Box, Orientation, BoxExt};
 use relm::Channel;
 use relm::Update;
 use relm::Relm;
 use relm::Widget;
+
+use modules::{LoadAvg, Module};
 
 pub struct Model {
     _channel: Channel<String>,
@@ -17,18 +18,19 @@ pub enum Msg {
     Value(String)
 }
 
-pub struct CpuModule {
+pub struct Block {
     model: Model,
     block: Box,
     label: Label,
 }
 
-impl Update for CpuModule {
+impl Update for Block {
     type Model = Model;
     type ModelParam = ();
     type Msg = Msg;
 
     fn model(relm: &Relm<Self>, _: ()) -> Model {
+        let module = LoadAvg {};
         let stream = relm.stream().clone();
         let (channel, sender) = Channel::new(move |val| {
             stream.emit(Msg::Value(val));
@@ -36,16 +38,7 @@ impl Update for CpuModule {
         thread::spawn(move || {
             loop {
                 thread::sleep(Duration::from_secs(1));
-                match loadavg() {
-                    Ok(load) => {
-                        let load_value = load.one.to_string();
-                        sender.send(load_value).expect("Counld't send data to channel");
-                    }
-                    Err(x) => {
-                        eprintln!("Cannot load cpu usage: {}", x);
-                        sender.send("error".to_string()).expect("Couldn't send data to channel");
-                    }
-                }
+                sender.send(module.get_value()).expect("Couldn't send value to channel");
             }
         });
         Model {
@@ -58,12 +51,12 @@ impl Update for CpuModule {
         match event {
             Msg::Value(val) => {
                 &self.label.set_text(&val);
-            },
+            }
         }
     }
 }
 
-impl Widget for CpuModule {
+impl Widget for Block {
     type Root = Box;
 
     fn root(&self) -> Self::Root {
@@ -82,7 +75,7 @@ impl Widget for CpuModule {
         block.pack_start(&label, true, true, 0);
         block.pack_start(&suffix, true, true, 0);
 
-        CpuModule {
+        Block {
             model,
             block,
             label,
