@@ -14,14 +14,13 @@ mod block;
 use gdk::prelude::*;
 use gtk::{Box, Label, Window, WindowType};
 use gtk::prelude::*;
-use relm::init;
+use relm::{ContainerWidget, Component};
 use block::CpuModule;
 
 
 pub struct Bar {
     container: Box,
-    left_widgets: Box,
-    right_widgets: Box,
+    _blocks: Vec<Component<CpuModule>>,
 }
 
 impl Bar {
@@ -35,15 +34,16 @@ impl Bar {
 
         left_widgets.pack_start(&test_label, true, true, 0);
 
-        let cpu_module = init::<CpuModule>(()).unwrap();
-        right_widgets.pack_start(cpu_module.widget(), true, true, 0);
+        let cpu_module = right_widgets.add_widget::<CpuModule>(());
 
         let container = gtk::Box::new(gtk::Orientation::Horizontal, 0);
 
         container.pack_start(&left_widgets, true, true, 0);
         container.pack_end(&right_widgets, true, true, 0);
 
-        Bar { container, left_widgets, right_widgets }
+        let blocks = vec!(cpu_module);
+
+        Bar { container, _blocks: blocks }
     }
 }
 
@@ -57,9 +57,9 @@ enum Msg {
 }
 
 struct App {
-    model: Model,
+    _model: Model,
     window: Window,
-    bar: Bar,
+    _bar: Bar,
 }
 
 impl Update for App {
@@ -77,7 +77,6 @@ impl Update for App {
             Msg::Quit => gtk::main_quit(),
         }
     }
-
 }
 
 impl Widget for App {
@@ -117,9 +116,9 @@ impl Widget for App {
         window.show_all();
 
         App {
-            model,
+            _model: model,
             window,
-            bar
+            _bar: bar
         }
     }
 }

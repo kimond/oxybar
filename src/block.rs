@@ -1,7 +1,7 @@
 use std::thread;
 use std::time::Duration;
 use sys_info::loadavg;
-use gtk::{Label, LabelExt};
+use gtk::{Label, LabelExt, Box, Orientation, BoxExt};
 use relm::Channel;
 use relm::Update;
 use relm::Relm;
@@ -19,7 +19,8 @@ pub enum Msg {
 
 pub struct CpuModule {
     model: Model,
-    pub label: Label
+    block: Box,
+    label: Label,
 }
 
 impl Update for CpuModule {
@@ -30,7 +31,6 @@ impl Update for CpuModule {
     fn model(relm: &Relm<Self>, _: ()) -> Model {
         let stream = relm.stream().clone();
         let (channel, sender) = Channel::new(move |val| {
-            println!("in stream");
             stream.emit(Msg::Value(val));
         });
         thread::spawn(move || {
@@ -55,10 +55,8 @@ impl Update for CpuModule {
     }
 
     fn update(&mut self, event: Msg) {
-        println!("in update");
         match event {
             Msg::Value(val) => {
-                println!("{}", &val);
                 &self.label.set_text(&val);
             },
         }
@@ -66,24 +64,29 @@ impl Update for CpuModule {
 }
 
 impl Widget for CpuModule {
-    type Root = Label;
+    type Root = Box;
 
     fn root(&self) -> Self::Root {
-        self.label.clone()
+        self.block.clone()
     }
 
-
     fn view(_relm: &Relm<Self>, model: Self::Model) -> Self {
+        let block = Box::new(Orientation::Horizontal, 0);
+        let prefix = Label::new("CPU ");
         let label = Label::new("...");
+        let suffix = Label::new("%");
 
         label.set_text(&model.value);
 
-        let mut module = CpuModule {
-            model,
-            label
-        };
+        block.pack_start(&prefix, true, true, 0);
+        block.pack_start(&label, true, true, 0);
+        block.pack_start(&suffix, true, true, 0);
 
-        module
+        CpuModule {
+            model,
+            block,
+            label,
+        }
     }
 }
 
