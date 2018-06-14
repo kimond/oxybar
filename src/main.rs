@@ -17,13 +17,14 @@ use gdk::prelude::*;
 use gtk::{Box, Window, WindowType};
 use gtk::prelude::*;
 use relm::{ContainerWidget, Component};
-use widgets::text::{Text, TextConfig};
+use widgets::{Text, TextConfig, Workspace};
 
-use modules::{ModuleType};
+use modules::ModuleType;
 
 
 pub struct Bar {
     container: Box,
+    _workspace: Component<Workspace>,
     _blocks: Vec<Component<Text>>,
 }
 
@@ -34,20 +35,22 @@ impl Bar {
         let right_widgets = Box::new(gtk::Orientation::Horizontal, 10);
         right_widgets.set_halign(gtk::Align::End);
 
+        let workspace_module = left_widgets.add_widget::<Workspace>(());
+
         let cpu_module_config = TextConfig {
             mod_type: ModuleType::LoadAvg,
             prefix: "CPU ".to_string(),
-            suffix: "%".to_string()
+            suffix: "%".to_string(),
         };
         let mem_module_config = TextConfig {
             mod_type: ModuleType::Memory,
             prefix: "MEM ".to_string(),
-            suffix: "GB".to_string()
+            suffix: "GB".to_string(),
         };
         let date_module_config = TextConfig {
             mod_type: ModuleType::Date,
             prefix: "".to_string(),
-            suffix: "".to_string()
+            suffix: "".to_string(),
         };
         let cpu_module = right_widgets.add_widget::<Text>(cpu_module_config);
         let mem_module = right_widgets.add_widget::<Text>(mem_module_config);
@@ -60,7 +63,7 @@ impl Bar {
 
         let blocks = vec!(cpu_module, mem_module, date_module);
 
-        Bar { container, _blocks: blocks }
+        Bar { container, _workspace: workspace_module, _blocks: blocks }
     }
 }
 
@@ -85,8 +88,7 @@ impl Update for App {
     type Msg = Msg;
 
     fn model(_: &Relm<Self>, _: ()) -> Model {
-        Model {
-        }
+        Model {}
     }
 
     fn update(&mut self, event: Msg) {
@@ -135,7 +137,7 @@ impl Widget for App {
         App {
             _model: model,
             window,
-            _bar: bar
+            _bar: bar,
         }
     }
 }
