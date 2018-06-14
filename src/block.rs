@@ -1,17 +1,21 @@
 use std::thread;
 use std::time::Duration;
-use gtk::{Label, LabelExt, Box, Orientation, BoxExt};
+use gtk;
+use gtk::{Label, LabelExt, Orientation, BoxExt};
 use relm::Channel;
 use relm::Update;
 use relm::Relm;
 use relm::Widget;
 
-use modules::{LoadAvg, Module};
+use modules::{LoadAvg, Module, ModuleType, Memory, module_from_type, Config};
 
 pub struct Model {
     _channel: Channel<String>,
+    prefix: String,
     value: String,
+    suffix: String,
 }
+
 
 #[derive(Msg)]
 pub enum Msg {
@@ -20,17 +24,17 @@ pub enum Msg {
 
 pub struct Block {
     model: Model,
-    block: Box,
+    block: gtk::Box,
     label: Label,
 }
 
 impl Update for Block {
     type Model = Model;
-    type ModelParam = ();
+    type ModelParam = Config;
     type Msg = Msg;
 
-    fn model(relm: &Relm<Self>, _: ()) -> Model {
-        let module = LoadAvg {};
+    fn model(relm: &Relm<Self>, params: Self::ModelParam) -> Model {
+        let module = module_from_type(params.mod_type);
         let stream = relm.stream().clone();
         let (channel, sender) = Channel::new(move |val| {
             stream.emit(Msg::Value(val));
@@ -43,7 +47,9 @@ impl Update for Block {
         });
         Model {
             _channel: channel,
+            prefix: params.prefix,
             value: "...".to_string(),
+            suffix: params.suffix,
         }
     }
 
@@ -57,19 +63,17 @@ impl Update for Block {
 }
 
 impl Widget for Block {
-    type Root = Box;
+    type Root = gtk::Box;
 
     fn root(&self) -> Self::Root {
         self.block.clone()
     }
 
     fn view(_relm: &Relm<Self>, model: Self::Model) -> Self {
-        let block = Box::new(Orientation::Horizontal, 0);
-        let prefix = Label::new("CPU ");
+        let block = gtk::Box::new(Orientation::Horizontal, 0);
+        let prefix = Label::new(model.prefix.as_str());
         let label = Label::new("...");
-        let suffix = Label::new("%");
-
-        label.set_text(&model.value);
+        let suffix = Label::new(model.suffix.as_str());
 
         block.pack_start(&prefix, true, true, 0);
         block.pack_start(&label, true, true, 0);

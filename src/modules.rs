@@ -5,8 +5,21 @@ pub enum ModuleType {
     Memory
 }
 
+pub struct Config {
+    pub mod_type: ModuleType,
+    pub prefix: String,
+    pub suffix: String,
+}
+
 pub trait Module {
    fn get_value(&self) -> String;
+}
+
+pub fn module_from_type(t: ModuleType) -> Box<Module + Send> {
+    match t {
+        ModuleType::LoadAvg => Box::new(LoadAvg{}),
+        ModuleType::Memory => Box::new(Memory{}),
+    }
 }
 
 pub struct LoadAvg { }
@@ -32,7 +45,8 @@ impl Module for Memory {
     fn get_value(&self) -> String {
         match mem_info() {
             Ok(info) => {
-                let value = (info.total - info.avail).to_string();
+                let value = ((info.total - info.avail) as f64 /1000.0)/1000.0;
+                let value = format!("{:.2}", value);
                 return value;
             }
             Err(x) => {

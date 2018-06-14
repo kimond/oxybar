@@ -18,7 +18,7 @@ use gtk::prelude::*;
 use relm::{ContainerWidget, Component};
 use block::Block;
 
-use modules::{Module, LoadAvg};
+use modules::{Module, LoadAvg, ModuleType, Config};
 
 
 pub struct Bar {
@@ -30,21 +30,28 @@ impl Bar {
     fn new() -> Bar {
         let left_widgets = Box::new(gtk::Orientation::Horizontal, 0);
         left_widgets.set_halign(gtk::Align::Start);
-        let right_widgets = Box::new(gtk::Orientation::Horizontal, 0);
+        let right_widgets = Box::new(gtk::Orientation::Horizontal, 5);
         right_widgets.set_halign(gtk::Align::End);
 
-        let test_label = Label::new("Oxybar");
-
-        left_widgets.pack_start(&test_label, true, true, 0);
-
-        let cpu_module = right_widgets.add_widget::<Block>(());
+        let cpu_module_config = Config {
+            mod_type: ModuleType::LoadAvg,
+            prefix: "CPU ".to_string(),
+            suffix: "%".to_string()
+        };
+        let mem_module_config = Config {
+            mod_type: ModuleType::Memory,
+            prefix: "MEM ".to_string(),
+            suffix: "GB".to_string()
+        };
+        let cpu_module = right_widgets.add_widget::<Block>(cpu_module_config);
+        let mem_module = right_widgets.add_widget::<Block>(mem_module_config);
 
         let container = gtk::Box::new(gtk::Orientation::Horizontal, 0);
 
         container.pack_start(&left_widgets, true, true, 0);
         container.pack_end(&right_widgets, true, true, 0);
 
-        let blocks = vec!(cpu_module);
+        let blocks = vec!(cpu_module, mem_module);
 
         Bar { container, _blocks: blocks }
     }
