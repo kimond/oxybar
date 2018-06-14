@@ -1,7 +1,7 @@
 use std::thread;
 use std::time::Duration;
 use gtk;
-use gtk::{Label, LabelExt, Orientation, BoxExt};
+use gtk::{Label, LabelExt, Orientation, BoxExt, WidgetExt, StyleContextExt};
 use relm::Channel;
 use relm::Update;
 use relm::Relm;
@@ -71,6 +71,7 @@ impl Widget for Text {
 
     fn view(_relm: &Relm<Self>, model: Self::Model) -> Self {
         let block = gtk::Box::new(Orientation::Horizontal, 0);
+        block.get_style_context().map(|c| c.add_class("oxybar-block"));
         let prefix = Label::new(model.prefix.as_str());
         let label = Label::new("...");
         let suffix = Label::new(model.suffix.as_str());

@@ -30,7 +30,7 @@ impl Bar {
     fn new() -> Bar {
         let left_widgets = Box::new(gtk::Orientation::Horizontal, 0);
         left_widgets.set_halign(gtk::Align::Start);
-        let right_widgets = Box::new(gtk::Orientation::Horizontal, 5);
+        let right_widgets = Box::new(gtk::Orientation::Horizontal, 10);
         right_widgets.set_halign(gtk::Align::End);
 
         let cpu_module_config = Config {
@@ -111,7 +111,7 @@ impl Widget for App {
         window.set_wmclass("oxybar", "Oxybar");
         window.set_border_width(1);
         window.set_position(gtk::WindowPosition::None);
-        window.set_default_size(monitor_rec.width, 20);
+        window.set_default_size(monitor_rec.width, 22);
         window.set_decorated(false);
         window.set_type_hint(gdk::WindowTypeHint::Dock);
         window.get_style_context().map(|c| c.add_class("oxybar-window"));

@@ -1,5 +1,11 @@
 
 .oxybar-window {
-    background: #012300;
+    font-family: "Hack", monospace;
+    font-size: 9pt;
+    background: #282a2e;
     color: #cccccc;
+}
+
+.oxybar-block {
+    border-bottom: 2px #634b73 solid;
 }
