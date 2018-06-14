@@ -1,28 +1,26 @@
+use chrono::Local;
 use sys_info::{loadavg, mem_info};
 
 pub enum ModuleType {
     LoadAvg,
-    Memory
+    Memory,
+    Date,
 }
 
-pub struct Config {
-    pub mod_type: ModuleType,
-    pub prefix: String,
-    pub suffix: String,
-}
 
 pub trait Module {
-   fn get_value(&self) -> String;
+    fn get_value(&self) -> String;
 }
 
 pub fn module_from_type(t: ModuleType) -> Box<Module + Send> {
     match t {
-        ModuleType::LoadAvg => Box::new(LoadAvg{}),
-        ModuleType::Memory => Box::new(Memory{}),
+        ModuleType::LoadAvg => Box::new(LoadAvg {}),
+        ModuleType::Memory => Box::new(Memory {}),
+        ModuleType::Date => Box::new(Date {}),
     }
 }
 
-pub struct LoadAvg { }
+pub struct LoadAvg {}
 
 impl Module for LoadAvg {
     fn get_value(&self) -> String {
@@ -39,13 +37,13 @@ impl Module for LoadAvg {
     }
 }
 
-pub struct Memory { }
+pub struct Memory {}
 
 impl Module for Memory {
     fn get_value(&self) -> String {
         match mem_info() {
             Ok(info) => {
-                let value = ((info.total - info.avail) as f64 /1000.0)/1000.0;
+                let value = ((info.total - info.avail) as f64 / 1000.0) / 1000.0;
                 let value = format!("{:.2}", value);
                 return value;
             }
@@ -54,6 +52,15 @@ impl Module for Memory {
                 return "error".to_string();
             }
         }
+    }
+}
+
+pub struct Date {}
+
+impl Module for Date {
+    fn get_value(&self) -> String {
+        let time = Local::now();
+        return format!("{}", time.format("%Y-%m-%d %H:%M"));
     }
 }
 

@@ -7,7 +7,13 @@ use relm::Update;
 use relm::Relm;
 use relm::Widget;
 
-use modules::{LoadAvg, Module, ModuleType, Memory, module_from_type, Config};
+use modules::{ModuleType, module_from_type};
+
+pub struct TextConfig {
+    pub mod_type: ModuleType,
+    pub prefix: String,
+    pub suffix: String,
+}
 
 pub struct Model {
     _channel: Channel<String>,
@@ -30,7 +36,7 @@ pub struct Text {
 
 impl Update for Text {
     type Model = Model;
-    type ModelParam = Config;
+    type ModelParam = TextConfig;
     type Msg = Msg;
 
     fn model(relm: &Relm<Self>, params: Self::ModelParam) -> Model {
@@ -57,6 +63,7 @@ impl Update for Text {
         match event {
             Msg::Value(val) => {
                 &self.label.set_text(&val);
+                self.model.value = val;
             }
         }
     }
@@ -73,7 +80,7 @@ impl Widget for Text {
         let block = gtk::Box::new(Orientation::Horizontal, 0);
         block.get_style_context().map(|c| c.add_class("oxybar-block"));
         let prefix = Label::new(model.prefix.as_str());
-        let label = Label::new("...");
+        let label = Label::new(model.value.as_str());
         let suffix = Label::new(model.suffix.as_str());
 
         block.pack_start(&prefix, true, true, 0);
