@@ -22,13 +22,13 @@ pub enum Msg {
     Value(String)
 }
 
-pub struct Block {
+pub struct Text {
     model: Model,
     block: gtk::Box,
     label: Label,
 }
 
-impl Update for Block {
+impl Update for Text {
     type Model = Model;
     type ModelParam = Config;
     type Msg = Msg;
@@ -62,7 +62,7 @@ impl Update for Block {
     }
 }
 
-impl Widget for Block {
+impl Widget for Text {
     type Root = gtk::Box;
 
     fn root(&self) -> Self::Root {
@@ -79,7 +79,7 @@ impl Widget for Block {
         block.pack_start(&label, true, true, 0);
         block.pack_start(&suffix, true, true, 0);
 
-        Block {
+        Text {
             model,
             block,
             label,

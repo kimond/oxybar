@@ -9,21 +9,21 @@ extern crate relm_derive;
 
 use relm::{Relm, Widget, Update};
 
-mod block;
+mod widgets;
 mod modules;
 
 use gdk::prelude::*;
 use gtk::{Box, Label, Window, WindowType};
 use gtk::prelude::*;
 use relm::{ContainerWidget, Component};
-use block::Block;
+use widgets::Text;
 
 use modules::{Module, LoadAvg, ModuleType, Config};
 
 
 pub struct Bar {
     container: Box,
-    _blocks: Vec<Component<Block>>,
+    _blocks: Vec<Component<Text>>,
 }
 
 impl Bar {
@@ -43,8 +43,8 @@ impl Bar {
             prefix: "MEM ".to_string(),
             suffix: "GB".to_string()
         };
-        let cpu_module = right_widgets.add_widget::<Block>(cpu_module_config);
-        let mem_module = right_widgets.add_widget::<Block>(mem_module_config);
+        let cpu_module = right_widgets.add_widget::<Text>(cpu_module_config);
+        let mem_module = right_widgets.add_widget::<Text>(mem_module_config);
 
         let container = gtk::Box::new(gtk::Orientation::Horizontal, 0);
 
