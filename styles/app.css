@@ -9,3 +9,12 @@
 .oxybar-block {
     border-bottom: 2px #634b73 solid;
 }
+
+.oxybar-workspace label {
+    padding: 0 20px;
+}
+
+.oxybar-workspace label.active {
+    background: #383c40;
+    border-bottom: 2px #634b73 solid;
+}

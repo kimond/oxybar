@@ -7,6 +7,8 @@ extern crate sys_info;
 extern crate relm;
 #[macro_use]
 extern crate relm_derive;
+extern crate xcb;
+extern crate xcb_util;
 
 use relm::{Relm, Widget, Update};
 
