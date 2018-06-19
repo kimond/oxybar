@@ -1,13 +1,13 @@
 use std::thread;
-use std::time::Duration;
 use gtk;
-use gtk::{Label, LabelExt, Orientation, BoxExt, WidgetExt, StyleContextExt};
+use gtk::{Label, LabelExt, Orientation, BoxExt, WidgetExt, StyleContextExt, ContainerExt};
 use relm::Channel;
 use relm::Update;
 use relm::Relm;
 use relm::Widget;
 use xcb;
 use xcb_util::ewmh;
+use std::sync::Arc;
 
 use modules::ModuleType;
 
@@ -18,7 +18,8 @@ pub struct WorkspaceConfig {
 }
 
 pub struct Model {
-    ewmh_conn: ewmh::Connection,
+    _channel: Channel<()>,
+    ewmh_conn: Arc<ewmh::Connection>,
     screen_idx: i32,
     items: Vec<WorkspaceItem>,
 }
@@ -61,7 +62,11 @@ impl Workspace {
             })
             .collect()
     }
-    fn render_items(&self) {
+    fn render_items(&mut self) {
+        let children = self.ws_box.get_children();
+        for child in children {
+            child.destroy();
+        }
         for item in &self.model.items {
             let label = Label::new(item.name.as_str());
             if item.active {
@@ -69,6 +74,7 @@ impl Workspace {
             }
             self.ws_box.pack_start(&label, true, true, 0);
         }
+        self.ws_box.show_all();
     }
 }
 
@@ -78,13 +84,40 @@ impl Update for Workspace {
     type Msg = Msg;
 
     fn model(relm: &Relm<Self>, _: ()) -> Model {
-        let (conn, screen_idx) = xcb::Connection::connect(None).expect("Failed to connect to X server");
+        let (conn, screen_idx) = xcb::Connection::connect(None)
+            .expect("Failed to connect to X server");
         let ewmh_conn = ewmh::Connection::connect(conn)
             .map_err(|(e, _)| e)
             .expect("Failed to wrap xcb conn in ewmh conn");
-
+        let ewmh_conn = Arc::new(ewmh_conn);
+        let stream = relm.stream().clone();
+        let (channel, sender) = Channel::new(move |_| {
+            stream.emit(Msg::Update);
+        });
+        let sub_ewmh_conn = ewmh_conn.clone();
+        thread::spawn(move || {
+            let setup = sub_ewmh_conn.get_setup();
+            let screen = setup.roots().nth(screen_idx as usize).unwrap();
+            let values =
+                [(xcb::CW_EVENT_MASK, xcb::EVENT_MASK_SUBSTRUCTURE_NOTIFY)];
+            {
+                let _ = xcb::change_window_attributes(&sub_ewmh_conn, screen.root(), &values)
+                    .request_check();
+            }
+            sub_ewmh_conn.flush();
+            loop {
+                let event = sub_ewmh_conn.wait_for_event();
+                match event {
+                    Some(_) => {
+                        sender.send(()).expect("Couldn't send value to sender")
+                    }
+                    None => ()
+                }
+            }
+        });
         Model {
-            ewmh_conn,
+            _channel: channel,
+            ewmh_conn: ewmh_conn.clone(),
             screen_idx,
             items: Vec::new(),
         }
@@ -97,11 +130,6 @@ impl Update for Workspace {
                 self.render_items();
             }
         }
-    }
-
-    fn subscriptions(&mut self, _relm: &Relm<Self>) {
-        let xcb_stream = xcb::XcbEventStream::new(self.model.ewmh_conn.clone(), ());
-
     }
 }
 
@@ -122,7 +150,6 @@ impl Widget for Workspace {
         };
 
         ws.update(Msg::Update);
-
         ws
     }
 }
