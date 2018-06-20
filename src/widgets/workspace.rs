@@ -1,6 +1,6 @@
 use std::thread;
 use gtk;
-use gtk::{Label, LabelExt, Orientation, BoxExt, WidgetExt, StyleContextExt, ContainerExt};
+use gtk::{Label, Orientation, BoxExt, WidgetExt, StyleContextExt, ContainerExt};
 use relm::Channel;
 use relm::Update;
 use relm::Relm;
@@ -99,7 +99,7 @@ impl Update for Workspace {
             let setup = sub_ewmh_conn.get_setup();
             let screen = setup.roots().nth(screen_idx as usize).unwrap();
             let values =
-                [(xcb::CW_EVENT_MASK, xcb::EVENT_MASK_SUBSTRUCTURE_NOTIFY)];
+                [(xcb::CW_EVENT_MASK, xcb::EVENT_MASK_PROPERTY_CHANGE)];
             {
                 let _ = xcb::change_window_attributes(&sub_ewmh_conn, screen.root(), &values)
                     .request_check();
