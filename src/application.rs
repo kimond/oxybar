@@ -103,21 +103,8 @@ impl Widget for App {
     // Create the widgets.
     fn view(relm: &Relm<Self>, model: Self::Model) -> Self {
         let display = gdk::Display::get_default().expect("Unable to get default display");
-        let mut monitor = display.get_primary_monitor().expect("Unable to get monitor");
-        if model.monitor == "primary" {
-            monitor = display.get_primary_monitor().expect("Unable to get monitor");
-        } else {
-            let nb_monitors = display.get_n_monitors();
-            for n in 0..nb_monitors {
-                if let Some(m) = display.get_monitor(n) {
-                    let monitor_model = m.get_model().unwrap_or("".to_string());
-                    if monitor_model == model.monitor {
-                        monitor = m;
-                        break;
-                    }
-                }
-            }
-        }
+        let monitor = get_monitor_from_config(&display, model.monitor.clone())
+            .expect("Unable to get monitor");
         let monitor_rec = monitor.get_geometry();
         let window = Window::new(WindowType::Toplevel);
         let screen = window.get_screen().unwrap();
@@ -125,7 +112,7 @@ impl Widget for App {
         let _ = style.load_from_data(CSS.as_bytes());
         gtk::StyleContext::add_provider_for_screen(&screen, &style, gtk::STYLE_PROVIDER_PRIORITY_USER);
 
-        window.move_(monitor_rec.x, 0);
+        window.move_(monitor_rec.x, monitor_rec.y);
         window.set_role("oxybar");
         window.set_wmclass("oxybar", "Oxybar");
         window.set_border_width(1);
@@ -150,4 +137,20 @@ impl Widget for App {
             _bar: bar,
         }
     }
+}
+
+fn get_monitor_from_config(display: &gdk::Display, monitor_value: String) -> Option<gdk::Monitor> {
+    if monitor_value == "primary" {
+        let m = display.get_primary_monitor().expect("Unable to get monitor");
+        return Some(m);
+    } else {
+        for n in 0..display.get_n_monitors() {
+            if let Some(m) = display.get_monitor(n) {
+                if monitor_value == m.get_model().unwrap_or("".to_string()) {
+                    return Some(m);
+                }
+            }
+        }
+    }
+    return None;
 }
