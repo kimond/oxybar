@@ -1,10 +1,12 @@
 use chrono::Local;
 use sys_info::{loadavg, mem_info};
+use sys_info::disk_info;
 
 pub enum ModuleType {
     LoadAvg,
     Memory,
     Date,
+    Disk,
 }
 
 
@@ -17,6 +19,7 @@ pub fn module_from_type(t: ModuleType) -> Box<Module + Send> {
         ModuleType::LoadAvg => Box::new(LoadAvg {}),
         ModuleType::Memory => Box::new(Memory {}),
         ModuleType::Date => Box::new(Date {}),
+        ModuleType::Disk => Box::new(Disk {}),
     }
 }
 
@@ -37,7 +40,7 @@ impl Module for LoadAvg {
     }
 }
 
-pub struct Memory {}
+pub struct Memory;
 
 impl Module for Memory {
     fn get_value(&self) -> String {
@@ -55,7 +58,7 @@ impl Module for Memory {
     }
 }
 
-pub struct Date {}
+pub struct Date;
 
 impl Module for Date {
     fn get_value(&self) -> String {
@@ -65,4 +68,21 @@ impl Module for Date {
 }
 
 
+pub struct Disk;
+
+impl Module for Disk {
+    fn get_value(&self) -> String {
+        match disk_info() {
+            Ok(info) => {
+                let value = ((info.total - info.free) as f64 / 1000.0) / 1000.0;
+                let value = format!("{:.0}", value);
+                return value;
+            }
+            Err(x) => {
+                eprintln!("Cannot load module info: {}", x);
+                return "error".to_string();
+            }
+        }
+    }
+}
 

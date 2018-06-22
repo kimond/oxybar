@@ -9,6 +9,7 @@ extern crate relm;
 extern crate relm_derive;
 extern crate xcb;
 extern crate xcb_util;
+extern crate gdk_sys;
 
 
 use clap::Arg;

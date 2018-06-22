@@ -12,6 +12,7 @@ gtk = "^0.4.0"
 sys-info = "*"
 xcb = "0.8.2"
 xcb-util = {version = "0.2.0", features = ["ewmh", "thread"]}
+gdk-sys = "0.6.0"
 
 [dependencies.gdk]
 version = "0.8.0"
