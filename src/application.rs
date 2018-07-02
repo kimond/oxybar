@@ -119,7 +119,7 @@ impl Widget for App {
         gtk::StyleContext::add_provider_for_screen(&screen, &style, gtk::STYLE_PROVIDER_PRIORITY_USER);
 
         window.move_(monitor_rec.x, monitor_rec.y);
-//        window.set_role("oxybar");
+        window.set_role("oxybar");
         window.set_wmclass("oxybar", "Oxybar");
         window.set_border_width(1);
         window.set_position(gtk::WindowPosition::None);
@@ -138,16 +138,6 @@ impl Widget for App {
         window.add(&bar.container);
 
         window.show_all();
-
-        let mut gdk_window = window.get_window().unwrap();
-        gdk::property_delete(&gdk_window, &gdk::Atom::intern("WM_NORMAL_HINTS"));
-        gdk::property_delete(&gdk_window, &gdk::Atom::intern("_GTK_THEME_VARIANT"));
-        gdk::property_delete(&gdk_window, &gdk::Atom::intern("_NET_WM_OPAQUE_REGION"));
-        gdk::property_delete(&gdk_window, &gdk::Atom::intern("WM_HINTS"));
-        gdk::property_delete(&gdk_window, &gdk::Atom::intern("WM_PROTOCOLS"));
-        gdk::property_delete(&gdk_window, &gdk::Atom::intern("_MOTIF_WM_HINTS"));
-        gdk::property_delete(&gdk_window, &gdk::Atom::intern("XdndAware"));
-        set_window_strut(&mut gdk_window);
 
         App {
             _model: model,
@@ -171,24 +161,4 @@ fn get_monitor_from_config(display: &gdk::Display, monitor_value: String) -> Opt
         }
     }
     return None;
-}
-
-fn set_window_strut(window: &mut gdk::Window) {
-    use relm::ToGlibPtr;
-    use gdk_sys as ffi;
-    use std::ffi::CString;
-    unsafe {
-        let gwin = window.to_glib_none();
-        let cardinal_char = CString::new("CARDINAL").unwrap();
-        let cardinal_atom = ffi::gdk_atom_intern_static_string(cardinal_char.as_ptr());
-        let strut_char = CString::new("_NET_WM_STRUT").unwrap();
-        let strut_atom = ffi::gdk_atom_intern_static_string(strut_char.as_ptr());
-        let strut_partial_char = CString::new("_NET_WM_STRUT_PARTIAL").unwrap();
-        let strut_partial_atom = ffi::gdk_atom_intern_static_string(strut_partial_char.as_ptr());
-        let strut_value: *const u8 = [0, 0, 22, 0].as_ptr();
-//        let strut_partial_value = [0, 0, 22, 0, 0, 0, 0, 0, 1920, 3839, 0, 0];
-        let strut_partial_value = [0, 0, 22, 0, 0, 0, 0, 0, 0, 255, 0, 0].as_ptr();
-        ffi::gdk_property_change(gwin.0, strut_atom, cardinal_atom, 8, ffi::GDK_PROP_MODE_REPLACE, strut_value, 4);
-        ffi::gdk_property_change(gwin.0, strut_partial_atom, cardinal_atom, 8, ffi::GDK_PROP_MODE_REPLACE, strut_partial_value, 12);
-    }
 }
