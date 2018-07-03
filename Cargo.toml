@@ -13,6 +13,9 @@ sys-info = "*"
 xcb = "0.8.2"
 xcb-util = {version = "0.2.0", features = ["ewmh", "thread"]}
 gdk-sys = "0.6.0"
+toml = "0.4.6"
+serde = "1.0.69"
+serde_derive = "1.0.69"
 
 [dependencies.gdk]
 version = "0.8.0"

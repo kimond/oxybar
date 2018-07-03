@@ -9,14 +9,6 @@ use xcb;
 use xcb_util::ewmh;
 use std::sync::Arc;
 
-use modules::ModuleType;
-
-pub struct WorkspaceConfig {
-    pub mod_type: ModuleType,
-    pub prefix: String,
-    pub suffix: String,
-}
-
 pub struct Model {
     _channel: Channel<()>,
     ewmh_conn: Arc<ewmh::Connection>,

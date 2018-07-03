@@ -4,70 +4,21 @@ use gdk::prelude::*;
 use gtk::prelude::*;
 use gtk::{Window, WindowType};
 use relm::{Relm, Widget, Update};
-use relm::{ContainerWidget, Component};
 
-use widgets::{Text, TextConfig, Workspace};
-use modules::ModuleType;
+use config::Config;
+use bar::Bar;
 
-pub struct Bar {
-    container: gtk::Box,
-    _workspace: Component<Workspace>,
-    _blocks: Vec<Component<Text>>,
-}
-
-impl Bar {
-    fn new() -> Bar {
-        let left_widgets = gtk::Box::new(gtk::Orientation::Horizontal, 0);
-        left_widgets.set_halign(gtk::Align::Start);
-        let right_widgets = gtk::Box::new(gtk::Orientation::Horizontal, 10);
-        right_widgets.set_halign(gtk::Align::End);
-
-        let workspace_module = left_widgets.add_widget::<Workspace>(());
-
-        let cpu_module_config = TextConfig {
-            mod_type: ModuleType::LoadAvg,
-            prefix: "CPU ".to_string(),
-            suffix: "%".to_string(),
-        };
-        let mem_module_config = TextConfig {
-            mod_type: ModuleType::Memory,
-            prefix: "MEM ".to_string(),
-            suffix: "GB".to_string(),
-        };
-        let date_module_config = TextConfig {
-            mod_type: ModuleType::Date,
-            prefix: "".to_string(),
-            suffix: "".to_string(),
-        };
-        let disk_module_config = TextConfig {
-            mod_type: ModuleType::Disk,
-            prefix: "Disk ".to_string(),
-            suffix: "GB".to_string(),
-        };
-        let cpu_module = right_widgets.add_widget::<Text>(cpu_module_config);
-        let mem_module = right_widgets.add_widget::<Text>(mem_module_config);
-        let disk_module = right_widgets.add_widget::<Text>(disk_module_config);
-        let date_module = right_widgets.add_widget::<Text>(date_module_config);
-
-        let container = gtk::Box::new(gtk::Orientation::Horizontal, 0);
-
-        container.pack_start(&left_widgets, true, true, 0);
-        container.pack_end(&right_widgets, true, true, 0);
-
-        let blocks = vec!(cpu_module, mem_module, date_module, disk_module);
-
-        Bar { container, _workspace: workspace_module, _blocks: blocks }
-    }
-}
 
 const CSS: &str = include_str!("../styles/app.css");
 
 pub struct Model {
-    monitor: String
+    monitor: String,
+    bar_config: Config
 }
 
 pub struct AppConfig {
-    pub monitor: String
+    pub monitor: String,
+    pub bar_config: Config
 }
 
 #[derive(Msg)]
@@ -88,7 +39,8 @@ impl Update for App {
 
     fn model(_: &Relm<Self>, params: Self::ModelParam) -> Model {
         Model {
-            monitor: params.monitor
+            monitor: params.monitor,
+            bar_config: params.bar_config
         }
     }
 
@@ -133,7 +85,7 @@ impl Widget for App {
         // Connect the signal `delete_event` to send the `Quit` message.
         connect!(relm, window, connect_delete_event(_, _), return (Some(Msg::Quit), Inhibit(false)));
 
-        let bar = Bar::new();
+        let bar = Bar::new(&model.bar_config);
 
         window.add(&bar.container);
 

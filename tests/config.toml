@@ -1,0 +1,15 @@
+height = 22
+left_modules = ["workspace"]
+right_modules = ["cpu", "date"]
+
+[modules.workspace]
+mod_type = "Workspace"
+
+[modules.cpu]
+mod_type = "LoadAvg"
+prefix = "CPU "
+
+[modules.date]
+mod_type = "Date"
+prefix = ""
+

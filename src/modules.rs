@@ -2,7 +2,10 @@ use chrono::Local;
 use sys_info::{loadavg, mem_info};
 use sys_info::disk_info;
 
+
+#[derive(Copy, Clone, Debug, Deserialize)]
 pub enum ModuleType {
+    Workspace,
     LoadAvg,
     Memory,
     Date,
@@ -16,6 +19,7 @@ pub trait Module {
 
 pub fn module_from_type(t: ModuleType) -> Box<Module + Send> {
     match t {
+        ModuleType::Workspace => Box::new(LoadAvg{}),
         ModuleType::LoadAvg => Box::new(LoadAvg {}),
         ModuleType::Memory => Box::new(Memory {}),
         ModuleType::Date => Box::new(Date {}),
