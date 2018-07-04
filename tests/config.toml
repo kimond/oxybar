@@ -11,5 +11,5 @@ prefix = "CPU "
 
 [modules.date]
 mod_type = "Date"
-prefix = ""
+prefix = " "
 
