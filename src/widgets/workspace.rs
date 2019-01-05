@@ -1,13 +1,17 @@
+use std::sync::Arc;
 use std::thread;
+
 use gtk;
-use gtk::{Label, Orientation, BoxExt, WidgetExt, StyleContextExt, ContainerExt};
-use relm::Channel;
-use relm::Update;
-use relm::Relm;
-use relm::Widget;
+use gtk::{BoxExt, ContainerExt, Label, Orientation, StyleContextExt, WidgetExt};
+use relm::{
+    Channel,
+    Relm,
+    Update,
+    Widget
+};
+use relm_derive::*;
 use xcb;
 use xcb_util::ewmh;
-use std::sync::Arc;
 
 pub struct Model {
     _channel: Channel<()>,

@@ -2,21 +2,22 @@
 name = "oxybar"
 version = "0.1.0"
 authors = ["Kim Desrosiers <kimdesro@gmail.com>"]
+edition = '2018'
 
 [dependencies]
 chrono = "0.4.3"
 clap = "2.31.2"
-relm = "^0.14.0"
-relm-derive = "^0.14.0"
-gtk = "^0.4.0"
+relm = "^0.15.0"
+relm-derive = "^0.15.0"
+gtk = "^0.5.0"
 sys-info = "*"
 xcb = "0.8.2"
 xcb-util = {version = "0.2.0", features = ["ewmh", "thread"]}
-gdk-sys = "0.6.0"
+gdk-sys = "0.7.0"
 toml = "0.4.6"
-serde = "1.0.69"
-serde_derive = "1.0.69"
+serde = "1.0.84"
+serde_derive = "1.0.84"
 
 [dependencies.gdk]
-version = "0.8.0"
+version = "0.9.0"
 features = ["v3_22"]

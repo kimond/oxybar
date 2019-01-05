@@ -1,13 +1,13 @@
 use gdk;
-use gtk;
 use gdk::prelude::*;
-use gtk::prelude::*;
+use gtk;
 use gtk::{Window, WindowType};
-use relm::{Relm, Widget, Update};
+use gtk::prelude::*;
+use relm::{connect, connect_stream, Relm, Update, Widget};
+use relm_derive::*;
 
-use config::Config;
-use bar::Bar;
-
+use crate::bar::Bar;
+use crate::config::Config;
 
 const CSS: &str = include_str!("../styles/app.css");
 

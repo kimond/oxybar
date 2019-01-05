@@ -1,22 +1,9 @@
-extern crate chrono;
-extern crate gdk;
-extern crate gtk;
-extern crate sys_info;
-extern crate clap;
-#[macro_use]
-extern crate relm;
-#[macro_use]
-extern crate relm_derive;
-extern crate xcb;
-extern crate xcb_util;
-extern crate gdk_sys;
-extern crate toml;
-extern crate serde;
-#[macro_use]
-extern crate serde_derive;
-
-
 use clap::Arg;
+use relm::Widget;
+
+use crate::application::{App, AppConfig};
+use crate::config::parse_config;
+use crate::utils::create_strut_window;
 
 mod widgets;
 mod modules;
@@ -27,12 +14,6 @@ mod macros;
 mod config;
 
 mod utils;
-
-use relm::Widget;
-use application::{App, AppConfig};
-use utils::create_strut_window;
-use config::parse_config;
-
 
 fn main() {
     let matches = clap::App::new("oxybar")
@@ -62,7 +43,7 @@ fn main() {
     let monitor = matches.value_of("monitor").unwrap_or("primary").to_string();
     let app_config = AppConfig {
         monitor,
-        bar_config
+        bar_config,
     };
 
     App::run(app_config).unwrap();

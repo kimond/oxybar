@@ -1,9 +1,9 @@
 use gtk;
 use gtk::prelude::*;
 use relm::{ContainerWidget, Component};
-use widgets::{Text, TextConfig, Workspace};
-use modules::ModuleType;
-use config::Config;
+use crate::widgets::{Text, TextConfig, Workspace};
+use crate::modules::ModuleType;
+use crate::config::Config;
 
 pub struct Bar {
     pub container: gtk::Box,

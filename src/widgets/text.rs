@@ -1,13 +1,17 @@
 use std::thread;
 use std::time::Duration;
-use gtk;
-use gtk::{Label, LabelExt, Orientation, BoxExt, WidgetExt, StyleContextExt};
-use relm::Channel;
-use relm::Update;
-use relm::Relm;
-use relm::Widget;
 
-use modules::{ModuleType, module_from_type};
+use gtk;
+use gtk::{BoxExt, Label, LabelExt, Orientation, StyleContextExt, WidgetExt};
+use relm::{
+    Channel,
+    Relm,
+    Update,
+    Widget,
+};
+use relm_derive::*;
+
+use crate::modules::{module_from_type, ModuleType};
 
 pub struct TextConfig {
     pub mod_type: ModuleType,

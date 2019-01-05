@@ -1,9 +1,10 @@
 use toml;
+use serde_derive::Deserialize;
 use std::fs;
 use std::io::{Read};
 use std::error::Error;
 use std::collections::HashMap;
-use modules::ModuleType;
+use crate::modules::ModuleType;
 
 
 #[derive(Debug, Deserialize)]

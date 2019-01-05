@@ -1,3 +1,4 @@
+use serde_derive::Deserialize;
 use chrono::Local;
 use sys_info::{loadavg, mem_info};
 use sys_info::disk_info;
